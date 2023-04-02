@@ -1,0 +1,222 @@
+////
+// varibales for ZFileUtils
+[VarDef,Zvers, 0]
+[VarDef,isMac, 0]
+[VarDef,separator, ""]
+[VarDef,dllPath, ""]
+[VarDef,dllVersion]
+[VarDef,minDllVersion]
+// variables for our plugins
+[VarDef,pluginDllPath, ""]
+// variable for localization
+[VarDef,enLangFilePath, ""]
+// path to directory of this plugin
+[VarDef,rootPath, ""]
+[VarDef,rootPathWithoutPrefix, ""]
+[VarDef,tmpValue, 0]
+// variable for export
+[VarDef,subTName, ""]
+[VarDef,activeSubT, ""]
+[VarDef,activeSubTName, ""]
+// variable for json string
+[VarDef, quote, [StrFromAsc, 34]]
+[MemCreate, jsonMem, 1024]
+[MemCreate, workingMem, 1024]
+[VarDef, bytesWritten, 0]
+
+//////
+// search dlls
+// from http://docs.pixologic.com/user-guide/customizing-zbrush/zscripting/zfileutils/#dllPath
+[RoutineDef, CheckSystem,	
+    //check ZBrush version
+    [VarSet,Zvers,[ZBrushInfo,0]]
+    [If,[Val,Zvers] >= 2021.0,,	
+        [Note,"\Cff9923This zscript\Cffffff is not designed for this version of 
+            \Cff9923ZBrush\Cffffff.",,3,4737096,,300]
+        [Exit]
+    ]
+    [VarSet,isMac, [ZBrushInfo,6]]	//check Mac or PC
+                                    // Make sure we have the dll and set its path
+    [If,[ZBrushInfo,16]==64,//64 bit
+        [If,isMac,
+            //use the path below for testing only
+            // [VarSet,rootPath,"ZOffset_Master_2022/"]
+            //use the path below for installed plugins
+            [VarSet,rootPath,"ZBRUSH_ZSTARTUP/ZPlugs64/ZOffset_Master_2022/"]
+            [VarSet, rootPath, [FileNameResolvePath, #rootPath]]
+            // for macOS, we remove first two characters ("!:")
+            [VarSet, rootPathWithoutPrefix, [StrExtract, #rootPath, 2, [StrLength, #rootPath] - 1]]
+
+            [VarSet,dllPath,[StrMerge, #rootPath,"ZFileUtils.lib"]]
+            [VarSet,pluginDllPath,[StrMerge, #rootPath,"resampleWithMarchingCubes.lib"]]
+            [VarSet,enLangFilePath,[StrMerge, #rootPath,"lang/ZOffset_Master_2022_en.xml"]]
+            [VarSet,separator,"/"]
+        ,
+            //use the path below for testing only
+            //[VarSet,rootPath,"ZOffset_Master_2022/"]
+            //use the path below for installed plugins
+            [VarSet,rootPath,"ZBRUSH_ZSTARTUP/ZPlugs64/ZOffset_Master_2022/"]
+            [VarSet, rootPath, [FileNameResolvePath, #rootPath]]
+            [Loop, [StrLength, rootPath],
+                [VarSet, tmpValue, [StrFind, "\", rootPath]]
+                [If, #tmpValue > -1,
+                    [VarSet, rootPath, [StrMerge, [StrExtract, rootPath, 0, tmpValue-1], "/", [StrExtract, rootPath, tmpValue+1, [StrLength, rootPath]-1]]],
+                    [LoopExit]
+                ]
+            ]
+            [VarSet, rootPathWithoutPrefix, #rootPath]
+
+            [VarSet,dllPath,[StrMerge, #rootPath,"ZFileUtils64.dll"]]
+            [VarSet,pluginDllPath,[StrMerge, #rootPath,"resampleWithMarchingCubes.dll"]]
+            [VarSet,enLangFilePath,[StrMerge, #rootPath,"lang/ZOffset_Master_2022_en.xml"]]
+            [VarSet,separator,"/"]
+        ]
+    ,//else 32 bit - no longer supported
+        [Note,"\Cff9923This zscript\Cffffff is not designed for this version of 
+            \Cff9923ZBrush\Cffffff.",,3,4737096,,300]
+        [Exit]
+    ]
+
+    [If, [FileExists, [Var,dllPath]] && [FileExists, [Var,pluginDllPath]] && [FileExists, [Var,enLangFilePath]],
+        //check that correct version
+        [VarSet, dllVersion, [FileExecute, [Var,dllPath], Version]]
+        [If,isMac,
+            // for macOS, latest ZFileUtils is 4.8
+            [VarSet, minDllVersion, 4.8]
+            ,
+            [VarSet, minDllVersion, 8.0]
+        ]
+        [If, #dllVersion >= #minDllVersion,//dll version
+            //OK
+        ,//else earlier version
+            [Note,"\Cff9923Note :\Cc0c0c0 The \Cff9923 ZFileUtils plugin \CffffffDLL\Cc0c0c0 is 
+                an earlier version which does not support this plugin.  Please install correct version."]
+            [Exit]
+        ]
+    , // else no DLL.
+        [Note,"\Cff9923Note :\Cc0c0c0 The \Cff9923 ZFileUtils plugin \CffffffDLL\Cc0c0c0 could
+            not be found at the correct location.  Please re-install the plugin, making sure the 
+            relevant files and folders are in the \CffffffZStartup/ZPlugs\Cc0c0c0 folder."]
+        [Exit]
+    ]
+]
+//////
+
+//////
+// translation routine
+// from http://docs.pixologic.com/user-guide/customizing-zbrush/zscripting/zfileutils/localization/
+[RoutineDef, ZFU_RegisterLocalizationFile,
+	[FileExecute, #dllPath, RegisterLocalizationFile, enFilePath]
+, enFilePath]
+//////
+
+//////
+// write str to mem (+ auto-resize)
+// note that strFragment must < 255 chars
+[RoutineDef, writeStrFragmentToJsonMem,
+    [If, [StrLength, strFragment]+#bytesWritten > [MemGetSize, jsonMem],
+        [MemCopy, jsonMem, 0, workingMem, 0, #bytesWritten]
+        [MemResize, jsonMem, [MemGetSize, jsonMem]+1024]
+        [MemCopy, workingMem, 0, jsonMem, 0, #bytesWritten]
+        [MemResize, workingMem, [MemGetSize, jsonMem]]
+    ]
+    [MemWriteString, jsonMem, strFragment, #bytesWritten]
+    [VarAdd, bytesWritten, [StrLength, strFragment]]
+, strFragment]
+
+//////
+// startup
+[RoutineCall, CheckSystem]
+[RoutineCall, ZFU_RegisterLocalizationFile, [FileNameResolvePath, #enLangFilePath]]
+
+//////
+// UI
+// button for offset
+[ISubPalette, "ZPlugin:ZOffset Master"]
+
+[ISlider, "ZPlugin:ZOffset Master:Mesh Height [mm]", 0.0, 0.1, 0.0, 500.0, "Mesh height (Y) [mm]\nIf you are responsible, please set 0.0", , 0, 1.0]
+[ISlider, "ZPlugin:ZOffset Master:Voxel Size [mm]", 1.0, 0.1, 0.1, 100.0, "Voxel size for mesh generation [mm]", , 0, 1.0]
+[ISlider, "ZPlugin:ZOffset Master:Offset Distance [mm]", 5.0, 0.1, 0.0, 100.0, "Offset distance [mm]", , 0, 1.0]
+
+[IButton, "ZPlugin:ZOffset Master:Offset", "Generate offset mesh", 
+    [IFreeze,
+        // export to GoZ file
+        [VarSet, subTName, [IGetTitle,Tool:ItemInfo]]
+        [VarSet, activeSubTName, [StrExtract, #subTName, 0, [StrLength, #subTName]-2]]
+        [FileNameSetNext, [StrMerge, #rootPath, #separator, "data", #separator, #activeSubTName, ".GoZ"]]
+        [IPress,Tool:Export]
+
+        ////
+        // generate JSON string
+        [RoutineCall, writeStrFragmentToJsonMem, "{"]
+            // rootPath
+            [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "root", #quote, ":", #quote, #rootPathWithoutPrefix, #quote, ","]]
+            // meshFile
+            [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "meshFile", #quote, ":", 
+            #quote, "data", #separator, #activeSubTName, ".GoZ", #quote, ","]]
+            // ZBrush
+            [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "ZBrush", #quote, ":{"]]
+                // ZBrush/meshHeight
+                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "meshHeight", #quote, ":", [IGet, "ZPlugin:ZOffset Master:Mesh Height [mm]"], ","]]
+                // ZBrush/voxelSize
+                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "voxelSize", #quote, ":", [IGet, "ZPlugin:ZOffset Master:Voxel Size [mm]"], ","]]
+                // ZBrush/offset
+                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "offset", #quote, ":", [IGet, "ZPlugin:ZOffset Master:Offset distance [mm]"], ","]]
+                // ZBrush/largestOnly
+                [If, [IGet, "ZPlugin:ZOffset Master:Largest Only"],
+                    [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "largestOnly", #quote, ":", "true", ","]]
+                    ,
+                    [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "largestOnly", #quote, ":", "false", ","]]
+                ]
+                // ZBrush/inverted
+                [If, [IGet, "ZPlugin:ZOffset Master:Inverted"],
+                    [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inverted", #quote, ":", "true", ","]]
+                    ,
+                    [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inverted", #quote, ":", "false", ","]]
+                ]
+                // ZBrush/inward
+                [If, [IGet, "ZPlugin:ZOffset Master:Inward"],
+                    [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inward", #quote, ":", "true"]]
+                    ,
+                    [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inward", #quote, ":", "false"]]
+                ]
+            [RoutineCall, writeStrFragmentToJsonMem, "}"]
+        [RoutineCall, writeStrFragmentToJsonMem, "}"]
+
+        [MemResize, workingMem, #bytesWritten]
+        [MemCopy, jsonMem, 0, workingMem, 0, #bytesWritten]
+        [MemSaveToFile, workingMem, [StrMerge, #rootPath, #separator, "data", #separator, "parameters.txt"], 1]
+        [MemResize, jsonMem, 1024]
+        [MemResize, workingMem, 1024]
+        [VarSet, bytesWritten, 0]
+
+        ////
+        // call dll function
+        [VarSet, result, [FileExecute, #pluginDllPath, "resample", [StrMerge, #rootPathWithoutPrefix, #separator, "data", #separator, "parameters.txt"]]]
+
+        [If, result,
+            // import
+            //   insert dummy subtool (to be overwritten by Import)
+            [IPress,"Tool:SubTool:Insert"]
+            [IPress,"PopUp:PolyMesh3D"]
+            // import offset mesh
+            [FileNameSetNext, [StrMerge, #rootPath, #separator, "data", #separator, #activeSubTName, "_offset", ".GoZ"]]
+            [IPress,"Tool:Import"]
+            // erase temporary file.
+            [FileDelete, [StrMerge, #rootPath, #separator, "data", #separator, #activeSubTName, ".GoZ"]]
+            [FileDelete, [StrMerge, #rootPath, #separator, "data", #separator, #activeSubTName, "_offset", ".GoZ"]]
+            [FileDelete, [StrMerge, #rootPath, #separator, "data", #separator, "parameters.txt"]]
+        ,
+            [Note, "Sorry, there is some error..."]
+        ]
+    ]
+    , 0, 0.25, , , 0.38
+]
+
+[ISwitch, "ZPlugin:ZOffset Master:Largest Only", 1, "Keep largest mesh only", , , , 0.73]
+[ISwitch, "ZPlugin:ZOffset Master:Inverted", 1, "Generate inverted mesh", , , , 0.73]
+[ISwitch, "ZPlugin:ZOffset Master:Inward", 1, "Offset inward", , , , 0.73]
+
+[IEnable, "ZPlugin:ZOffset Master:Largest Only"]
+[IEnable, "ZPlugin:ZOffset Master:Inverted"]
+[IEnable, "ZPlugin:ZOffset Master:Inward"]

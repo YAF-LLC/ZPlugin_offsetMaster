@@ -1,0 +1,10 @@
+{
+    "name": "zoffset-master",
+    "version-string": "2022",
+    "description": "ZBrush plugin for generating offset mesh",
+    "homepage": "https://github.com/n-taka/ZOffset_Master",
+    "dependencies": [
+        "nlohmann-json",
+        "eigen3"
+    ]
+}

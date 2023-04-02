@@ -1,0 +1,30 @@
+<buttons>
+  <button path="ZPlugin:ZOffset Master:Mesh Height [mm]">
+    <title text="Mesh Height [mm]" trans=""/>
+    <info text="Mesh height (Y) [mm]\nIf you are responsible, please set 0.0" trans=""/>
+  </button>
+  <button path="ZPlugin:ZOffset Master:Voxel Size [mm]">
+    <title text="Voxel Size [mm]" trans=""/>
+    <info text="Voxel size for mesh generation [mm]" trans=""/>
+  </button>
+  <button path="ZPlugin:ZOffset Master:Offset Distance [mm]">
+    <title text="Offset Distance [mm]" trans=""/>
+    <info text="Offset distance [mm]" trans=""/>
+  </button>
+  <button path="ZPlugin:ZOffset Master:Offset">
+    <title text="Offset" trans=""/>
+    <info text="Generate offset mesh" trans=""/>
+  </button>
+  <button path="ZPlugin:ZOffset Master:Largest Only">
+    <title text="Largest Only" trans=""/>
+    <info text="Keep largest mesh only" trans=""/>
+  </button>
+  <button path="ZPlugin:ZOffset Master:Inverted">
+    <title text="Inverted" trans=""/>
+    <info text="Generate inverted mesh" trans=""/>
+  </button>
+  <button path="ZPlugin:ZOffset Master:Inward">
+    <title text="Inward" trans=""/>
+    <info text="Offset inward" trans=""/>
+  </button>
+</buttons>
