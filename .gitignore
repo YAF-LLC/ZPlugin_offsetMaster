@@ -46,3 +46,6 @@ _deps
 build
 example
 .DS_Store
+
+!ZPlugs64/**/*.dll
+!ZPlugs64/**/*.lib
