@@ -40,22 +40,22 @@
     [If,[ZBrushInfo,16]==64,//64 bit
         [If,isMac,
             //use the path below for testing only
-            // [VarSet,rootPath,"ZOffset_Master_2022/"]
+            // [VarSet,rootPath,"offsetMaster_2022/"]
             //use the path below for installed plugins
-            [VarSet,rootPath,"ZBRUSH_ZSTARTUP/ZPlugs64/ZOffset_Master_2022/"]
+            [VarSet,rootPath,"ZBRUSH_ZSTARTUP/ZPlugs64/offsetMaster_2022/"]
             [VarSet, rootPath, [FileNameResolvePath, #rootPath]]
             // for macOS, we remove first two characters ("!:")
             [VarSet, rootPathWithoutPrefix, [StrExtract, #rootPath, 2, [StrLength, #rootPath] - 1]]
 
             [VarSet,dllPath,[StrMerge, #rootPath,"ZFileUtils.lib"]]
             [VarSet,pluginDllPath,[StrMerge, #rootPath,"resampleWithMarchingCubes.lib"]]
-            [VarSet,enLangFilePath,[StrMerge, #rootPath,"lang/ZOffset_Master_2022_en.xml"]]
+            [VarSet,enLangFilePath,[StrMerge, #rootPath,"lang/offsetMaster_2022_en.xml"]]
             [VarSet,separator,"/"]
         ,
             //use the path below for testing only
-            //[VarSet,rootPath,"ZOffset_Master_2022/"]
+            //[VarSet,rootPath,"offsetMaster_2022/"]
             //use the path below for installed plugins
-            [VarSet,rootPath,"ZBRUSH_ZSTARTUP/ZPlugs64/ZOffset_Master_2022/"]
+            [VarSet,rootPath,"ZBRUSH_ZSTARTUP/ZPlugs64/offsetMaster_2022/"]
             [VarSet, rootPath, [FileNameResolvePath, #rootPath]]
             [Loop, [StrLength, rootPath],
                 [VarSet, tmpValue, [StrFind, "\", rootPath]]
@@ -68,7 +68,7 @@
 
             [VarSet,dllPath,[StrMerge, #rootPath,"ZFileUtils64.dll"]]
             [VarSet,pluginDllPath,[StrMerge, #rootPath,"resampleWithMarchingCubes.dll"]]
-            [VarSet,enLangFilePath,[StrMerge, #rootPath,"lang/ZOffset_Master_2022_en.xml"]]
+            [VarSet,enLangFilePath,[StrMerge, #rootPath,"lang/offsetMaster_2022_en.xml"]]
             [VarSet,separator,"/"]
         ]
     ,//else 32 bit - no longer supported
@@ -132,13 +132,13 @@
 //////
 // UI
 // button for offset
-[ISubPalette, "ZPlugin:ZOffset Master"]
+[ISubPalette, "ZPlugin:offsetMaster"]
 
-[ISlider, "ZPlugin:ZOffset Master:Mesh Height [mm]", 0.0, 0.1, 0.0, 500.0, "Mesh height (Y) [mm]\nIf you are responsible, please set 0.0", , 0, 1.0]
-[ISlider, "ZPlugin:ZOffset Master:Voxel Size [mm]", 1.0, 0.1, 0.1, 100.0, "Voxel size for mesh generation [mm]", , 0, 1.0]
-[ISlider, "ZPlugin:ZOffset Master:Offset Distance [mm]", 5.0, 0.1, 0.0, 100.0, "Offset distance [mm]", , 0, 1.0]
+[ISlider, "ZPlugin:offsetMaster:Mesh Height [mm]", 0.0, 0.1, 0.0, 500.0, "Mesh height (Y) [mm]\nIf you are responsible, please set 0.0", , 0, 1.0]
+[ISlider, "ZPlugin:offsetMaster:Voxel Size [mm]", 1.0, 0.1, 0.1, 100.0, "Voxel size for mesh generation [mm]", , 0, 1.0]
+[ISlider, "ZPlugin:offsetMaster:Offset Distance [mm]", 5.0, 0.1, 0.0, 100.0, "Offset distance [mm]", , 0, 1.0]
 
-[IButton, "ZPlugin:ZOffset Master:Offset", "Generate offset mesh", 
+[IButton, "ZPlugin:offsetMaster:Offset", "Generate offset mesh", 
     [IFreeze,
         // export to GoZ file
         [VarSet, subTName, [IGetTitle,Tool:ItemInfo]]
@@ -157,25 +157,25 @@
             // ZBrush
             [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "ZBrush", #quote, ":{"]]
                 // ZBrush/meshHeight
-                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "meshHeight", #quote, ":", [IGet, "ZPlugin:ZOffset Master:Mesh Height [mm]"], ","]]
+                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "meshHeight", #quote, ":", [IGet, "ZPlugin:offsetMaster:Mesh Height [mm]"], ","]]
                 // ZBrush/voxelSize
-                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "voxelSize", #quote, ":", [IGet, "ZPlugin:ZOffset Master:Voxel Size [mm]"], ","]]
+                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "voxelSize", #quote, ":", [IGet, "ZPlugin:offsetMaster:Voxel Size [mm]"], ","]]
                 // ZBrush/offset
-                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "offset", #quote, ":", [IGet, "ZPlugin:ZOffset Master:Offset distance [mm]"], ","]]
+                [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "offset", #quote, ":", [IGet, "ZPlugin:offsetMaster:Offset distance [mm]"], ","]]
                 // ZBrush/largestOnly
-                [If, [IGet, "ZPlugin:ZOffset Master:Largest Only"],
+                [If, [IGet, "ZPlugin:offsetMaster:Largest Only"],
                     [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "largestOnly", #quote, ":", "true", ","]]
                     ,
                     [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "largestOnly", #quote, ":", "false", ","]]
                 ]
                 // ZBrush/inverted
-                [If, [IGet, "ZPlugin:ZOffset Master:Inverted"],
+                [If, [IGet, "ZPlugin:offsetMaster:Inverted"],
                     [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inverted", #quote, ":", "true", ","]]
                     ,
                     [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inverted", #quote, ":", "false", ","]]
                 ]
                 // ZBrush/inward
-                [If, [IGet, "ZPlugin:ZOffset Master:Inward"],
+                [If, [IGet, "ZPlugin:offsetMaster:Inward"],
                     [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inward", #quote, ":", "true"]]
                     ,
                     [RoutineCall, writeStrFragmentToJsonMem, [StrMerge, #quote, "inward", #quote, ":", "false"]]
@@ -213,10 +213,10 @@
     , 0, 0.25, , , 0.38
 ]
 
-[ISwitch, "ZPlugin:ZOffset Master:Largest Only", 1, "Keep largest mesh only", , , , 0.73]
-[ISwitch, "ZPlugin:ZOffset Master:Inverted", 1, "Generate inverted mesh", , , , 0.73]
-[ISwitch, "ZPlugin:ZOffset Master:Inward", 1, "Offset inward", , , , 0.73]
+[ISwitch, "ZPlugin:offsetMaster:Largest Only", 1, "Keep largest mesh only", , , , 0.73]
+[ISwitch, "ZPlugin:offsetMaster:Inverted", 1, "Generate inverted mesh", , , , 0.73]
+[ISwitch, "ZPlugin:offsetMaster:Inward", 1, "Offset inward", , , , 0.73]
 
-[IEnable, "ZPlugin:ZOffset Master:Largest Only"]
-[IEnable, "ZPlugin:ZOffset Master:Inverted"]
-[IEnable, "ZPlugin:ZOffset Master:Inward"]
+[IEnable, "ZPlugin:offsetMaster:Largest Only"]
+[IEnable, "ZPlugin:offsetMaster:Inverted"]
+[IEnable, "ZPlugin:offsetMaster:Inward"]

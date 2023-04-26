@@ -85,10 +85,10 @@ endif ()
 #####################
 if (WIN32)
     add_custom_command(TARGET ${PROJECT} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/build/plugin/Release/resampleWithMarchingCubes.dll" "$<TARGET_FILE_DIR:${PROJECT}>")
-    add_custom_command(TARGET ${PROJECT} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/build/plugin/Release/resampleWithMarchingCubes.dll" "${CMAKE_CURRENT_SOURCE_DIR}/ZPlugs64/ZOffset_Master_2022/resampleWithMarchingCubes.dll")
+    add_custom_command(TARGET ${PROJECT} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/build/plugin/Release/resampleWithMarchingCubes.dll" "${CMAKE_CURRENT_SOURCE_DIR}/ZPlugs64/offsetMaster_2022/resampleWithMarchingCubes.dll")
 elseif (APPLE)
     add_custom_command(TARGET ${PROJECT} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/build/plugin/libresampleWithMarchingCubes.dylib" "$<TARGET_FILE_DIR:${PROJECT}>/resampleWithMarchingCubes.lib")
-    add_custom_command(TARGET ${PROJECT} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/build/plugin/libresampleWithMarchingCubes.dylib" "${CMAKE_CURRENT_SOURCE_DIR}/ZPlugs64/ZOffset_Master_2022/resampleWithMarchingCubes.lib")
+    add_custom_command(TARGET ${PROJECT} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/build/plugin/libresampleWithMarchingCubes.dylib" "${CMAKE_CURRENT_SOURCE_DIR}/ZPlugs64/offsetMaster_2022/resampleWithMarchingCubes.lib")
 endif ()
 ###########################
 ##### Resources (end) #####
