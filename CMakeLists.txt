@@ -1,4 +1,4 @@
-
+#
 # Copyright (C) 2023 Kazutaka Nakashima (kazutaka.nakashima@n-taka.info)
 #
 # GPLv3
